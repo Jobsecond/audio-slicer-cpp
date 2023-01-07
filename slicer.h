@@ -10,18 +10,18 @@
 class Slicer {
 private:
     double threshold;
-    int64_t hop_size;
-    int64_t win_size;
-    int64_t min_length;
-    int64_t min_interval;
-    int64_t max_sil_kept;
+    uint64_t hop_size;
+    uint64_t win_size;
+    uint64_t min_length;
+    uint64_t min_interval;
+    uint64_t max_sil_kept;
 private:
-    xt::xarray<float> _apply_slice(const xt::xarray<float>& waveform, int64_t begin, int64_t end);
+    xt::xarray<float> _apply_slice(const xt::xarray<float>& waveform, uint64_t begin, uint64_t end);
 public:
-    Slicer(int sr, double threshold = -40.0, int64_t min_length = 5000, int64_t min_interval = 300, int64_t hop_size = 20, int64_t max_sil_kept = 5000);
+    Slicer(int sr, double threshold = -40.0, uint64_t min_length = 5000, uint64_t min_interval = 300, uint64_t hop_size = 20, uint64_t max_sil_kept = 5000);
     std::vector<xt::xarray<float>> slice(const xt::xarray<float>& waveform);
 };
 
-xt::xarray<double> get_rms(const xt::xarray<double>& arr, std::size_t frame_length = 2048, std::size_t hop_length = 512);
+xt::xarray<double> get_rms(const xt::xarray<double>& arr, uint64_t frame_length = 2048, uint64_t hop_length = 512);
 
 #endif //AUDIO_SLICER_SLICER_H

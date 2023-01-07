@@ -25,7 +25,7 @@ inline T divIntRound(T n, T d)
         ((n + (d / 2)) / d);
 }
 
-Slicer::Slicer(int sr, double threshold, int64_t min_length, int64_t min_interval, int64_t hop_size, int64_t max_sil_kept)
+Slicer::Slicer(int sr, double threshold, uint64_t min_length, uint64_t min_interval, uint64_t hop_size, uint64_t max_sil_kept)
 {
     if (!((min_length >= min_interval) && (min_interval >= hop_size)))
     {
@@ -37,11 +37,11 @@ Slicer::Slicer(int sr, double threshold, int64_t min_length, int64_t min_interva
     }
 
     this->threshold = std::pow(10, threshold / 20.0);
-    this->hop_size = divIntRound<int64_t>(hop_size * sr, 1000);
-    this->win_size = std::min(divIntRound<int64_t>(min_interval * sr, 1000), 4 * this->hop_size);
-    this->min_length = divIntRound<int64_t>(min_length * sr, 1000 * this->hop_size);
-    this->min_interval = divIntRound<int64_t>(min_interval * sr, 1000 * this->hop_size);
-    this->max_sil_kept = divIntRound<int64_t>(max_sil_kept * sr, 1000 * this->hop_size);
+    this->hop_size = divIntRound<uint64_t>(hop_size * (uint64_t)sr, (uint64_t)1000);
+    this->win_size = std::min(divIntRound<uint64_t>(min_interval * (uint64_t)sr, (uint64_t)1000), (uint64_t)4 * this->hop_size);
+    this->min_length = divIntRound<uint64_t>(min_length * (uint64_t)sr, (uint64_t)1000 * this->hop_size);
+    this->min_interval = divIntRound<uint64_t>(min_interval * (uint64_t)sr, (uint64_t)1000 * this->hop_size);
+    this->max_sil_kept = divIntRound<uint64_t>(max_sil_kept * (uint64_t)sr, (uint64_t)1000 * this->hop_size);
 }
 
 std::vector<xt::xarray<float>>
@@ -55,16 +55,16 @@ Slicer::slice(const xt::xarray<float>& waveform)
         return v;
     }
 
-    xt::xarray<float> rms_list = get_rms(samples, (std::size_t) this->win_size, (std::size_t) this->hop_size);
+    xt::xarray<float> rms_list = get_rms(samples, (uint64_t) this->win_size, (uint64_t) this->hop_size);
 
-    std::vector<std::tuple<int64_t, int64_t>> sil_tags;
-    int64_t silence_start = 0;
+    std::vector<std::tuple<uint64_t, uint64_t>> sil_tags;
+    uint64_t silence_start = 0;
     bool has_silence_start = false;
-    int64_t clip_start = 0;
+    uint64_t clip_start = 0;
 
-    int64_t pos, pos_l, pos_r;
+    uint64_t pos = 0, pos_l = 0, pos_r = 0;
 
-    for (int64_t i = 0; i < rms_list.size(); i++)
+    for (uint64_t i = 0; i < rms_list.size(); i++)
     {
         double rms = rms_list[i];
         // Keep looping while frame is silent.
@@ -154,10 +154,10 @@ Slicer::slice(const xt::xarray<float>& waveform)
         has_silence_start = false;
     }
     // Deal with trailing silence.
-    int64_t total_frames = rms_list.shape(0);
+    uint64_t total_frames = rms_list.shape(0);
     if (has_silence_start && ((total_frames - silence_start) >= this->min_interval))
     {
-        int64_t silence_end = std::min(total_frames, silence_start + this->max_sil_kept);
+        uint64_t silence_end = std::min(total_frames, silence_start + this->max_sil_kept);
         pos = xt::argmin(
                 xt::view(rms_list, xt::range(silence_start, silence_end + 1))
         )[0] + silence_start;
@@ -172,7 +172,7 @@ Slicer::slice(const xt::xarray<float>& waveform)
     else
     {
         std::vector<xt::xarray<float>> chunks;
-        int64_t s0 = std::get<0>(sil_tags[0]);
+        uint64_t s0 = std::get<0>(sil_tags[0]);
         if (s0 > 0)
         {
             chunks.push_back(this->_apply_slice(waveform, 0, s0));
@@ -190,31 +190,31 @@ Slicer::slice(const xt::xarray<float>& waveform)
 }
 
 xt::xarray<float>
-Slicer::_apply_slice(const xt::xarray<float> &waveform, int64_t begin, int64_t end)
+Slicer::_apply_slice(const xt::xarray<float> &waveform, uint64_t begin, uint64_t end)
 {
     if (waveform.shape(0) > 1)
     {
-        return xt::view(waveform, xt::range(begin * this->hop_size, std::min((int64_t)waveform.shape(0), end * this->hop_size)), xt::all());
+        return xt::view(waveform, xt::range(begin * this->hop_size, std::min((uint64_t)waveform.shape(0), end * this->hop_size)), xt::all());
     }
-    return xt::view(waveform, xt::range(begin * this->hop_size, std::min((int64_t)waveform.shape(0), end * this->hop_size)));
+    return xt::view(waveform, xt::range(begin * this->hop_size, std::min((uint64_t)waveform.shape(0), end * this->hop_size)));
 }
 
 
-xt::xarray<double> get_rms(const xt::xarray<double>& arr, std::size_t frame_length, std::size_t hop_length)
+xt::xarray<double> get_rms(const xt::xarray<double>& arr, uint64_t frame_length, uint64_t hop_length)
 {
-    std::size_t arr_length = arr.size();
+    uint64_t arr_length = arr.size();
 
-    std::size_t padding = frame_length / 2;
+    uint64_t padding = frame_length / 2;
 
-    std::size_t rms_size = arr_length / hop_length + 1;
+    uint64_t rms_size = arr_length / hop_length + 1;
 
     xt::xarray<double> rms = xt::zeros<double>({rms_size});
 
-    std::size_t left = 0;
-    std::size_t right = 0;
-    std::size_t hop_count = 0;
+    uint64_t left = 0;
+    uint64_t right = 0;
+    uint64_t hop_count = 0;
 
-    std::size_t rms_index = 0;
+    uint64_t rms_index = 0;
     double val = 0;
 
     // Initial condition: the frame is at the beginning of padded array

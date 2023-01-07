@@ -27,21 +27,21 @@ int main(int argc, char **argv)
             .help("The dB threshold for silence detection")
             .scan<'g', double>();
     parser.add_argument("--min_length")
-            .default_value((int64_t)(5000))
+            .default_value((uint64_t)(5000))
             .help("The minimum milliseconds required for each sliced audio clip")
-            .scan<'i', int64_t>();
+            .scan<'i', uint64_t>();
     parser.add_argument("--min_interval")
-            .default_value((int64_t)(300))
+            .default_value((uint64_t)(300))
             .help("The minimum milliseconds for a silence part to be sliced")
-            .scan<'i', int64_t>();
+            .scan<'i', uint64_t>();
     parser.add_argument("--hop_size")
-            .default_value((int64_t)(10))
+            .default_value((uint64_t)(10))
             .help("Frame length in milliseconds")
-            .scan<'i', int64_t>();
+            .scan<'i', uint64_t>();
     parser.add_argument("--max_sil_kept")
-            .default_value((int64_t)(500))
+            .default_value((uint64_t)(500))
             .help("The maximum silence length kept around the sliced clip, presented in milliseconds")
-            .scan<'i', int64_t>();
+            .scan<'i', uint64_t>();
 
     try {
         parser.parse_args(argc, argv);
@@ -55,10 +55,10 @@ int main(int argc, char **argv)
     auto out_str = parser.get("--out");
     auto filename = parser.get("audio");
     auto db_thresh = parser.get<double>("--db_thresh");
-    auto min_length = parser.get<int64_t>("--min_length");
-    auto min_interval = parser.get<int64_t>("--min_interval");
-    auto hop_size = parser.get<int64_t>("--hop_size");
-    auto max_sil_kept = parser.get<int64_t>("--max_sil_kept");
+    auto min_length = parser.get<uint64_t>("--min_length");
+    auto min_interval = parser.get<uint64_t>("--min_interval");
+    auto hop_size = parser.get<uint64_t>("--hop_size");
+    auto max_sil_kept = parser.get<uint64_t>("--max_sil_kept");
 
     auto path = std::filesystem::absolute(filename);
     auto out = out_str.empty() ? path.parent_path() : std::filesystem::path(out_str);
@@ -70,7 +70,7 @@ int main(int argc, char **argv)
     int64_t frames = handle.frames();
 
 
-    xt::xarray<float> audio = xt::zeros<float>({(size_t)frames, (size_t)channels});
+    xt::xarray<float> audio = xt::zeros<float>({(uint64_t)frames, (uint64_t)channels});
 
     handle.read(audio.data(), frames * channels);
 
