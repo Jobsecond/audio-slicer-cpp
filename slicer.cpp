@@ -4,7 +4,6 @@
 #include <stdexcept>
 #include <iostream>
 #include <fstream>
-#include <chrono>
 
 #include <xtensor/xview.hpp>
 #include <xtensor/xsort.hpp>
@@ -36,7 +35,7 @@ Slicer::slice(const xt::xarray<float>& waveform)
 {
     xt::xarray<float> samples = xt::mean(waveform, 1);
 
-    if (samples.shape()[0] <= this->min_length)
+    if (samples.shape(0) <= this->min_length)
     {
         std::vector<xt::xarray<float>> v {waveform};
         return v;
@@ -162,7 +161,7 @@ Slicer::slice(const xt::xarray<float>& waveform)
         {
             chunks.push_back(this->_apply_slice(waveform, 0, s0));
         }
-        for (int i = 0; i < sil_tags.size(); i++)
+        for (int i = 0; i < sil_tags.size() - 1; i++)
         {
             chunks.push_back(this->_apply_slice(waveform, std::get<1>(sil_tags[i]), std::get<0>(sil_tags[i + 1])));
         }
@@ -177,11 +176,11 @@ Slicer::slice(const xt::xarray<float>& waveform)
 xt::xarray<float>
 Slicer::_apply_slice(const xt::xarray<float> &waveform, int64_t begin, int64_t end)
 {
-    if (waveform.shape()[0] > 1)
+    if (waveform.shape(0) > 1)
     {
-        return xt::view(waveform, xt::range(begin * this->hop_size, std::min((int64_t)waveform.shape()[0], end * this->hop_size)), xt::all());
+        return xt::view(waveform, xt::range(begin * this->hop_size, std::min((int64_t)waveform.shape(0), end * this->hop_size)), xt::all());
     }
-    return xt::view(waveform, xt::range(begin * this->hop_size, std::min((int64_t)waveform.shape()[0], end * this->hop_size)));
+    return xt::view(waveform, xt::range(begin * this->hop_size, std::min((int64_t)waveform.shape(0), end * this->hop_size)));
 }
 
 

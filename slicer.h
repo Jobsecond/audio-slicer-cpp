@@ -5,6 +5,8 @@
 #ifndef AUDIO_SLICER_SLICER_H
 #define AUDIO_SLICER_SLICER_H
 
+#include <xtensor/xarray.hpp>
+
 class Slicer {
 private:
     double threshold;
