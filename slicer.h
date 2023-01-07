@@ -18,7 +18,7 @@ private:
 private:
     xt::xarray<float> _apply_slice(const xt::xarray<float>& waveform, int64_t begin, int64_t end);
 public:
-    Slicer(int sr, double threshold, int64_t min_length, int64_t min_interval, int64_t hop_size, int64_t max_sil_kept);
+    Slicer(int sr, double threshold = -40.0, int64_t min_length = 5000, int64_t min_interval = 300, int64_t hop_size = 20, int64_t max_sil_kept = 5000);
     std::vector<xt::xarray<float>> slice(const xt::xarray<float>& waveform);
 };
 

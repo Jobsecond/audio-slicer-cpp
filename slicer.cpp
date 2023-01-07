@@ -10,6 +10,20 @@
 
 #include "slicer.h"
 
+template<class T>
+inline T divIntRound(T n, T d);
+
+template<class T>
+inline T divIntRound(T n, T d)
+{
+    /*
+     * Integer division rounding to the closest integer, without converting to floating point numbers.
+     */
+    // T should be an integer type (int, int64_t, uint64_t, ...)
+    return ((n < 0) ^ (d < 0)) ? \
+        ((n - (d / 2)) / d) : \
+        ((n + (d / 2)) / d);
+}
 
 Slicer::Slicer(int sr, double threshold, int64_t min_length, int64_t min_interval, int64_t hop_size, int64_t max_sil_kept)
 {
@@ -21,13 +35,13 @@ Slicer::Slicer(int sr, double threshold, int64_t min_length, int64_t min_interva
     {
         throw std::invalid_argument("The following condition must be satisfied: max_sil_kept >= hop_size");
     }
-    double min_interval_d = (double)min_interval * sr / 1000;
-    this->threshold = std::pow(10, (double)threshold / 20.0);
-    this->hop_size = (int64_t)(std::round((double)hop_size * sr / 1000));
-    this->win_size = std::min((int64_t)std::round(min_interval_d), 4 * this->hop_size);
-    this->min_length = (int64_t)std::round((double)min_length * sr / 1000 / (double)(this->hop_size));
-    this->min_interval = (int64_t)std::round(min_interval_d / (double)(this->hop_size));
-    this->max_sil_kept = (int64_t)std::round((double)max_sil_kept * sr / 1000 / (double)(this->hop_size));
+
+    this->threshold = std::pow(10, threshold / 20.0);
+    this->hop_size = divIntRound<int64_t>(hop_size * sr, 1000);
+    this->win_size = std::min(divIntRound<int64_t>(min_interval * sr, 1000), 4 * this->hop_size);
+    this->min_length = divIntRound<int64_t>(min_length * sr, 1000 * this->hop_size);
+    this->min_interval = divIntRound<int64_t>(min_interval * sr, 1000 * this->hop_size);
+    this->max_sil_kept = divIntRound<int64_t>(max_sil_kept * sr, 1000 * this->hop_size);
 }
 
 std::vector<xt::xarray<float>>
@@ -207,7 +221,7 @@ xt::xarray<double> get_rms(const xt::xarray<double>& arr, std::size_t frame_leng
         val += arr[right] * arr[right];
         right++;
     }
-    rms[rms_index++] = (std::sqrt(std::max(0.0, (double)val / frame_length)));
+    rms[rms_index++] = (std::sqrt(std::max(0.0, (double)val / (double)frame_length)));
 
     // Left side or right side of the frame has not touched the sides of original array
     while ((right < frame_length) && (right < arr_length) && (rms_index < rms_size))
@@ -216,7 +230,7 @@ xt::xarray<double> get_rms(const xt::xarray<double>& arr, std::size_t frame_leng
         hop_count++;
         if (hop_count == hop_length)
         {
-            rms[rms_index++] = (std::sqrt(std::max(0.0, (double)val / frame_length)));
+            rms[rms_index++] = (std::sqrt(std::max(0.0, (double)val / (double)frame_length)));
             hop_count = 0;
         }
         right++;  // Move right 1 step at a time.
@@ -230,7 +244,7 @@ xt::xarray<double> get_rms(const xt::xarray<double>& arr, std::size_t frame_leng
             hop_count++;
             if (hop_count == hop_length)
             {
-                rms[rms_index++] = (std::sqrt(std::max(0.0, (double)val / frame_length)));
+                rms[rms_index++] = (std::sqrt(std::max(0.0, (double)val / (double)frame_length)));
                 hop_count = 0;
             }
             left++;
@@ -244,7 +258,7 @@ xt::xarray<double> get_rms(const xt::xarray<double>& arr, std::size_t frame_leng
             hop_count++;
             if (hop_count == hop_length)
             {
-                rms[rms_index++] = (std::sqrt(std::max(0.0, (double)val / frame_length)));
+                rms[rms_index++] = (std::sqrt(std::max(0.0, (double)val / (double)frame_length)));
                 hop_count = 0;
             }
             right++;
@@ -257,7 +271,7 @@ xt::xarray<double> get_rms(const xt::xarray<double>& arr, std::size_t frame_leng
         hop_count++;
         if (hop_count == hop_length)
         {
-            rms[rms_index++] = (std::sqrt(std::max(0.0, (double)val / frame_length)));
+            rms[rms_index++] = (std::sqrt(std::max(0.0, (double)val / (double)frame_length)));
             hop_count = 0;
         }
         left++;

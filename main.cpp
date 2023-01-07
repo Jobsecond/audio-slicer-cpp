@@ -18,30 +18,30 @@ int main(int argc, char **argv)
     argparse::ArgumentParser parser("audio_slicer");
 
     parser.add_argument("audio")
-        .help("The audio to be sliced");
+            .help("The audio to be sliced");
     parser.add_argument("--out")
-        .default_value(std::string())
-        .help("Output directory of the sliced audio clips");
+            .default_value(std::string())
+            .help("Output directory of the sliced audio clips");
     parser.add_argument("--db_thresh")
-        .default_value((double)(-40.0))
-        .help("The dB threshold for silence detection")
-        .scan<'g', double>();
+            .default_value((double)(-40.0))
+            .help("The dB threshold for silence detection")
+            .scan<'g', double>();
     parser.add_argument("--min_length")
-        .default_value((int64_t)(5000))
-        .help("The minimum milliseconds required for each sliced audio clip")
-        .scan<'i', int64_t>();
+            .default_value((int64_t)(5000))
+            .help("The minimum milliseconds required for each sliced audio clip")
+            .scan<'i', int64_t>();
     parser.add_argument("--min_interval")
-        .default_value((int64_t)(300))
-        .help("The minimum milliseconds for a silence part to be sliced")
-        .scan<'i', int64_t>();
+            .default_value((int64_t)(300))
+            .help("The minimum milliseconds for a silence part to be sliced")
+            .scan<'i', int64_t>();
     parser.add_argument("--hop_size")
-        .default_value((int64_t)(10))
-        .help("Frame length in milliseconds")
-        .scan<'i', int64_t>();
+            .default_value((int64_t)(10))
+            .help("Frame length in milliseconds")
+            .scan<'i', int64_t>();
     parser.add_argument("--max_sil_kept")
-        .default_value((int64_t)(500))
-        .help("The maximum silence length kept around the sliced clip, presented in milliseconds")
-        .scan<'i', int64_t>();
+            .default_value((int64_t)(500))
+            .help("The maximum silence length kept around the sliced clip, presented in milliseconds")
+            .scan<'i', int64_t>();
 
     try {
         parser.parse_args(argc, argv);
