@@ -14,16 +14,11 @@ template<class T>
 inline T divIntRound(T n, T d);
 
 template<class T>
-inline T divIntRound(T n, T d)
-{
-    /*
-     * Integer division rounding to the closest integer, without converting to floating point numbers.
-     */
-    // T should be an integer type (int, int64_t, uint64_t, ...)
-    return ((n < 0) ^ (d < 0)) ? \
-        ((n - (d / 2)) / d) : \
-        ((n + (d / 2)) / d);
-}
+inline uint64_t argmin_range_view(const std::vector<T>& v, uint64_t begin, uint64_t end);
+
+template<class T>
+inline uint64_t argmin_range_view(const xt::xarray<T> &v, uint64_t begin, uint64_t end);
+
 
 Slicer::Slicer(int sr, double threshold, uint64_t min_length, uint64_t min_interval, uint64_t hop_size, uint64_t max_sil_kept)
 {
@@ -55,7 +50,7 @@ Slicer::slice(const xt::xarray<float>& waveform)
         return v;
     }
 
-    xt::xarray<float> rms_list = get_rms(samples, (uint64_t) this->win_size, (uint64_t) this->hop_size);
+    xt::xarray<double> rms_list = get_rms(samples, (uint64_t) this->win_size, (uint64_t) this->hop_size);
 
     std::vector<std::tuple<uint64_t, uint64_t>> sil_tags;
     uint64_t silence_start = 0;
@@ -97,9 +92,7 @@ Slicer::slice(const xt::xarray<float>& waveform)
         // Need slicing. Record the range of silent frames to be removed.
         if ((i - silence_start) <= this->max_sil_kept)
         {
-            pos = xt::argmin(
-                    xt::view(rms_list, xt::range(silence_start, i + 1))
-            )[0] + silence_start;
+            pos = argmin_range_view<double>(rms_list, silence_start, i + 1) + silence_start;
             if (silence_start == 0)
             {
                 sil_tags.emplace_back(0, pos);
@@ -112,16 +105,10 @@ Slicer::slice(const xt::xarray<float>& waveform)
         }
         else if ((i - silence_start) <= (this->max_sil_kept * 2))
         {
-            pos = xt::argmin(
-                    xt::view(rms_list, xt::range(i - this->max_sil_kept, silence_start + this->max_sil_kept + 1))
-            )[0];
+            pos = argmin_range_view<double>(rms_list, i - this->max_sil_kept, silence_start + this->max_sil_kept + 1);
             pos += i - this->max_sil_kept;
-            pos_l = xt::argmin(
-                    xt::view(rms_list, xt::range(silence_start, silence_start + this->max_sil_kept + 1))
-            )[0] + silence_start;
-            pos_r = xt::argmin(
-                    xt::view(rms_list, xt::range(i - this->max_sil_kept, i + 1))
-            )[0] + i - this->max_sil_kept;
+            pos_l = argmin_range_view<double>(rms_list, silence_start, silence_start + this->max_sil_kept + 1) + silence_start;
+            pos_r = argmin_range_view<double>(rms_list, i - this->max_sil_kept, i + 1) + i - this->max_sil_kept;
             if (silence_start == 0)
             {
                 clip_start = pos_r;
@@ -135,12 +122,8 @@ Slicer::slice(const xt::xarray<float>& waveform)
         }
         else
         {
-            pos_l = xt::argmin(
-                    xt::view(rms_list, xt::range(silence_start, silence_start + this->max_sil_kept + 1))
-            )[0] + silence_start;
-            pos_r = xt::argmin(
-                    xt::view(rms_list, xt::range(i - this->max_sil_kept, i + 1))
-            )[0] + i - this->max_sil_kept;
+            pos_l = argmin_range_view<double>(rms_list, silence_start, silence_start + this->max_sil_kept + 1) + silence_start;
+            pos_r = argmin_range_view<double>(rms_list, i - this->max_sil_kept, i + 1) + i - this->max_sil_kept;
             if (silence_start == 0)
             {
                 sil_tags.emplace_back(0, pos_r);
@@ -154,13 +137,11 @@ Slicer::slice(const xt::xarray<float>& waveform)
         has_silence_start = false;
     }
     // Deal with trailing silence.
-    uint64_t total_frames = rms_list.shape(0);
+    uint64_t total_frames = rms_list.size();
     if (has_silence_start && ((total_frames - silence_start) >= this->min_interval))
     {
         uint64_t silence_end = std::min(total_frames, silence_start + this->max_sil_kept);
-        pos = xt::argmin(
-                xt::view(rms_list, xt::range(silence_start, silence_end + 1))
-        )[0] + silence_start;
+        pos = argmin_range_view<double>(rms_list, silence_start, silence_end + 1) + silence_start;
         sil_tags.emplace_back(pos, total_frames + 1);
     }
     // Apply and return slices.
@@ -281,4 +262,30 @@ xt::xarray<double> get_rms(const xt::xarray<double>& arr, uint64_t frame_length,
     }
 
     return rms;
+}
+
+template<class T>
+inline T divIntRound(T n, T d)
+{
+    /*
+     * Integer division rounding to the closest integer, without converting to floating point numbers.
+     */
+    // T should be an integer type (int, int64_t, uint64_t, ...)
+    return ((n < 0) ^ (d < 0)) ? \
+        ((n - (d / 2)) / d) : \
+        ((n + (d / 2)) / d);
+}
+
+template<class T>
+inline uint64_t argmin_range_view(const std::vector<T>& v, uint64_t begin, uint64_t end)
+{
+    auto min_it = std::min_element(v.begin() + begin, v.begin() + end);
+    return std::distance(v.begin() + begin, min_it);
+}
+
+template<class T>
+inline uint64_t argmin_range_view(const xt::xarray<T> &v, uint64_t begin, uint64_t end)
+{
+    auto min_it = std::min_element(v.begin() + begin, v.begin() + end);
+    return std::distance(v.begin() + begin, min_it);
 }
