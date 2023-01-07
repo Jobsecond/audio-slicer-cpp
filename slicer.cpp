@@ -58,7 +58,8 @@ Slicer::slice(const xt::xarray<float>& waveform)
     xt::xarray<float> rms_list = get_rms(samples, (std::size_t) this->win_size, (std::size_t) this->hop_size);
 
     std::vector<std::tuple<int64_t, int64_t>> sil_tags;
-    int64_t silence_start = -1;
+    int64_t silence_start = 0;
+    bool has_silence_start = false;
     int64_t clip_start = 0;
 
     int64_t pos, pos_l, pos_r;
@@ -70,14 +71,15 @@ Slicer::slice(const xt::xarray<float>& waveform)
         if (rms < this->threshold)
         {
             // Record start of silent frames.
-            if (silence_start == -1)
+            if (!has_silence_start)
             {
                 silence_start = i;
+                has_silence_start = true;
             }
             continue;
         }
         // Keep looping while frame is not silent and silence start has not been recorded.
-        if (silence_start == -1)
+        if (!has_silence_start)
         {
             continue;
         }
@@ -88,7 +90,7 @@ Slicer::slice(const xt::xarray<float>& waveform)
                 ( (i - clip_start) >= this->min_length) );
         if ((!is_leading_silence) && (!need_slice_middle))
         {
-            silence_start = -1;
+            has_silence_start = false;
             continue;
         }
 
@@ -149,11 +151,11 @@ Slicer::slice(const xt::xarray<float>& waveform)
             }
             clip_start = pos_r;
         }
-        silence_start = -1;
+        has_silence_start = false;
     }
     // Deal with trailing silence.
     int64_t total_frames = rms_list.shape(0);
-    if ((silence_start != -1) && ((total_frames - silence_start) >= this->min_interval))
+    if (has_silence_start && ((total_frames - silence_start) >= this->min_interval))
     {
         int64_t silence_end = std::min(total_frames, silence_start + this->max_sil_kept);
         pos = xt::argmin(
