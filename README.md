@@ -7,7 +7,7 @@ C++ implementation of OpenVPI [Audio Slicer](https://github.com/openvpi/audio-sl
 This project uses vcpkg to manage dependencies. Run the following command to install dependencies:
 
 ```bash
-vcpkg install libsndfile xtensor argparse
+vcpkg install libsndfile argparse
 ```
 
 To build with CMake, you need to set `CMAKE_TOOLCHAIN_FILE` variable:
@@ -23,9 +23,7 @@ The project requires C++17.
 * [libsndfile](https://github.com/libsndfile/libsndfile)
   * GNU LGPL v2.1
 * [vcpkg](https://github.com/microsoft/vcpkg)
-  - MIT License
-* [xtensor](https://github.com/xtensor-stack/xtensor)
-  * BSD-3-Clause License
+  * MIT License
 * [argparse](https://github.com/p-ranav/argparse)
   * MIT License
 

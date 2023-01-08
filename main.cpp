@@ -9,8 +9,6 @@
 
 #include <sndfile.hh>
 
-#include <xtensor/xarray.hpp>
-
 #include "slicer.h"
 
 int main(int argc, char **argv)
@@ -67,15 +65,15 @@ int main(int argc, char **argv)
     int channels = handle.channels();
     int sr = handle.samplerate();
     int format = handle.format();
-    int64_t frames = handle.frames();
+    auto frames = handle.frames();
 
+    auto total_size = frames * channels;
+    std::vector<float> audio = std::vector<float>(total_size);
 
-    xt::xarray<float> audio = xt::zeros<float>({(uint64_t)frames, (uint64_t)channels});
-
-    handle.read(audio.data(), frames * channels);
+    handle.read(audio.data(), total_size);
 
     Slicer slicer(sr, db_thresh, min_length, min_interval, hop_size, max_sil_kept);
-    auto chunks = slicer.slice(audio);
+    auto chunks = slicer.slice(audio, (unsigned int)channels);
 
     try
     {
@@ -93,7 +91,10 @@ int main(int argc, char **argv)
     int idx = 0;
     for (auto chunk : chunks)
     {
-        if (chunk.size() == 0)
+        auto begin_frame = std::get<0>(chunk) * channels;
+        auto end_frame = std::get<1>(chunk) * channels;
+        auto frame_count = (sf_count_t)(end_frame - begin_frame);
+        if ((begin_frame == end_frame) || (begin_frame > total_size) || (end_frame > total_size))
         {
             continue;
         }
@@ -101,7 +102,7 @@ int main(int argc, char **argv)
         ss << std::filesystem::path(filename).stem().string() << "_" << idx << ".wav";
         std::filesystem::path out_file_path = out / ss.str();
         SndfileHandle wf = SndfileHandle(out_file_path.string().data(), SFM_WRITE, format, channels, sr);
-        wf.write(chunk.data(), chunk.size());
+        wf.write(audio.data() + begin_frame, frame_count);
         idx++;
     }
 
