@@ -15,8 +15,5 @@ add_executable(audio_slicer
 find_package(SndFile CONFIG REQUIRED)
 target_link_libraries(audio_slicer PRIVATE SndFile::sndfile)
 
-find_package(xtensor CONFIG REQUIRED)
-target_link_libraries(audio_slicer PRIVATE xtensor)
-
 find_package(argparse CONFIG REQUIRED)
 target_link_libraries(audio_slicer PRIVATE argparse::argparse)

@@ -5,6 +5,9 @@
 #ifndef AUDIO_SLICER_SLICER_H
 #define AUDIO_SLICER_SLICER_H
 
+#include <vector>
+#include <tuple>
+
 class Slicer {
 private:
     double threshold;
