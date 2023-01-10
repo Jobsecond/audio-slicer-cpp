@@ -30,6 +30,8 @@ You can set `AUDIO_SLICER_CLI` and `AUDIO_SLICER_GUI` options to choose which ve
 -DAUDIO_SLICER_CLI=ON -DAUDIO_SLICER_GUI=ON
 ```
 
+For macOS build, you can turn on `BUILD_MACOSX_BUNDLE` option to build macOS app bundles.
+
 ## Open-source softwares used
 
 * [libsndfile](https://github.com/libsndfile/libsndfile)
