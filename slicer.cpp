@@ -141,7 +141,7 @@ Slicer::slice(const std::vector<float>& waveform, unsigned int channels)
     uint64_t total_frames = rms_list.size();
     if (has_silence_start && ((total_frames - silence_start) >= this->min_interval))
     {
-        uint64_t silence_end = std::min(total_frames, silence_start + this->max_sil_kept);
+        uint64_t silence_end = std::min(total_frames - 1, silence_start + this->max_sil_kept);
         pos = argmin_range_view<double>(rms_list, silence_start, silence_end + 1) + silence_start;
         sil_tags.emplace_back(pos, total_frames + 1);
     }
@@ -277,6 +277,12 @@ inline T divIntRound(T n, T d)
 template<class T>
 inline uint64_t argmin_range_view(const std::vector<T>& v, uint64_t begin, uint64_t end)
 {
+    // Ensure vector access is not out of bound
+    auto size = v.size();
+    if (begin > size)  begin = size;
+    if (end > size)    end = size;
+    if (begin >= end)  return 0;
+
     auto min_it = std::min_element(v.begin() + begin, v.begin() + end);
     return std::distance(v.begin() + begin, min_it);
 }
