@@ -10,8 +10,8 @@ endif()
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-set(AUDIO_SLICER_CLI TRUE)
-set(AUDIO_SLICER_GUI TRUE)
+option(AUDIO_SLICER_CLI "Build CLI version" ON)
+option(AUDIO_SLICER_GUI "Build GUI version" ON)
 
 if(NOT(AUDIO_SLICER_CLI OR AUDIO_SLICER_GUI))
     MESSAGE(FATAL_ERROR "Must build one of CLI or GUI version, or both.")
