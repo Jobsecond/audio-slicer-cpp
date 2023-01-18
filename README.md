@@ -22,6 +22,12 @@ To build with CMake, you need to set `CMAKE_TOOLCHAIN_FILE` variable:
 
 Please change  `${VCPKG_PATH}` to the location of vcpkg installation. CMake will find all the packages needed.
 
+Note: If you already have Qt installed on your system, you can specify its location by setting `CMAKE_PREFIX_PATH` to your Qt installation instead of building it again using `vcpkg`.
+
+```bash
+-DCMAKE_PREFIX_PATH=${PATH_TO_YOUR_QT}/lib/cmake/Qt5
+```
+
 ### Build options
 
 You can set `AUDIO_SLICER_CLI` and `AUDIO_SLICER_GUI` options to choose which versions (CLI / GUI) to build.

@@ -55,6 +55,10 @@ endif()
 
 set(LIBS SndFile::sndfile argparse::argparse)
 
+if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 8.0 AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+    set(LIBS "stdc++fs" ${LIBS})
+endif()
+
 if(AUDIO_SLICER_CLI)
     target_link_libraries(audio_slicer_cli PRIVATE ${LIBS})
 endif()
