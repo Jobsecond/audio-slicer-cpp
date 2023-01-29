@@ -257,12 +257,15 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
-    auto paths_string = event->mimeData()->text().trimmed();
-    auto re = QRegularExpression("[\r\n]");
-    auto paths = paths_string.split(re);
+    auto urls = event->mimeData()->urls();
     bool has_wav = false;
-    for (const auto &path: paths)
+    for (const auto &url: urls)
     {
+        if (!url.isLocalFile())
+        {
+            continue;
+        }
+        auto path = url.toLocalFile();
         auto ext = QFileInfo(path).suffix();
         if (ext.compare("wav", Qt::CaseInsensitive) == 0)
         {
@@ -275,12 +278,16 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
         event->accept();
     }
 }
-#include <iostream>
+
 void MainWindow::dropEvent(QDropEvent *event)
 {
     auto urls = event->mimeData()->urls();
     for (const auto &url: urls)
     {
+        if (!url.isLocalFile())
+        {
+            continue;
+        }
         auto path = url.toLocalFile();
         auto ext = QFileInfo(path).suffix();
         if (ext.compare("wav", Qt::CaseInsensitive) != 0)
