@@ -5,7 +5,6 @@
 
 int main(int argc, char **argv)
 {
-    QApplication::setAttribute(Qt::ApplicationAttribute::AA_EnableHighDpiScaling);
     QApplication app(argc, argv);
     app.setApplicationName("Audio Slicer");
     app.setApplicationDisplayName("Audio Slicer");
