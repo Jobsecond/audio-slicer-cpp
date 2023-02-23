@@ -67,3 +67,10 @@ if(AUDIO_SLICER_GUI)
     target_link_libraries(audio_slicer_gui PRIVATE ${LIBS} ${LIBS_GUI})
     set_target_properties(audio_slicer_gui PROPERTIES AUTOMOC TRUE)
 endif()
+
+if(APPLE AND AUDIO_SLICER_GUI AND BUILD_MACOSX_BUNDLE)
+    set_target_properties(audio_slicer_gui PROPERTIES
+    BUILD_RPATH "@executable_path/../Frameworks"
+    INSTALL_RPATH "@executable_path/../Frameworks"    
+    )
+endif()

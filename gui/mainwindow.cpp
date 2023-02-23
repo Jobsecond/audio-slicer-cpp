@@ -117,7 +117,7 @@ void MainWindow::slot_clear_audio_list()
 
 void MainWindow::slot_about()
 {
-    QMessageBox::information(this, "About", "1.0.0.0\nCopyright 2020-2022 OpenVPI Team");
+    QMessageBox::information(this, "About", "Audio Slicer v1.1.0\nCopyright 2020-2023 OpenVPI Team");
 }
 
 void MainWindow::slot_start()
