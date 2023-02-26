@@ -1,0 +1,12 @@
+project(AudioSlicerLib)
+set(TARGET_NAME ${PROJECT_NAME})
+
+set(SLICER_PATH ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+
+add_library(${TARGET_NAME} STATIC slicer.cpp)
+set_target_properties(
+    ${TARGET_NAME} PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+)
+

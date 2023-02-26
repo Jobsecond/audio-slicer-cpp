@@ -14,7 +14,7 @@
 #endif
 
 #include "workthread.h"
-#include "../slicer.h"
+#include "slicer.h"
 
 WorkThread::WorkThread(
         QString filename,
