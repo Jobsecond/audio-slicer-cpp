@@ -52,6 +52,11 @@ void WorkThread::run()
 
         SndfileHandle handle(path.string().c_str());
 #endif
+        if (handle.error() != SF_ERR_NO_ERROR)
+        {
+            emit oneError(QString("Sndfile error: %1").arg(handle.strError()));
+            return;
+        }
         int channels = handle.channels();
         int sr = handle.samplerate();
         int format = handle.format();
@@ -70,6 +75,13 @@ void WorkThread::run()
 
         Slicer slicer(sr, m_threshold, m_min_length, m_min_interval, m_hop_size, m_max_sil_kept);
         auto chunks = slicer.slice(audio, (unsigned int)channels);
+
+        if (chunks.empty())
+        {
+            QString errmsg = QString("ValueError: The following conditions must be satisfied: (min_length >= min_interval >= hop_size) and (max_sil_kept >= hop_size).");
+            emit oneError(errmsg);
+            return;
+        }
 
         if (!std::filesystem::exists(out))
         {
@@ -101,12 +113,6 @@ void WorkThread::run()
             wf.write(audio.data() + begin_frame, frame_count);
             idx++;
         }
-    }
-    catch (const std::invalid_argument& err)
-    {
-        QString errmsg = QString("Invalid argument: %1").arg(err.what());
-        emit oneError(errmsg);
-        return;
     }
     catch (const std::filesystem::filesystem_error& err)
     {
