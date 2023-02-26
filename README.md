@@ -36,7 +36,11 @@ You can set `AUDIO_SLICER_CLI` and `AUDIO_SLICER_GUI` options to choose which ve
 -DAUDIO_SLICER_CLI=ON -DAUDIO_SLICER_GUI=ON
 ```
 
-You can choose to build 
+You can choose to build using Qt 5 or Qt 6. If both Qt 5 and Qt 6 are found, CMake will use Qt 6 to configure the project. If you want to force use Qt 5, you can turn on `USE_QT5` option:
+
+```bash
+-DUSE_QT5=ON
+```
 
 For macOS build, you can turn on `BUILD_MACOSX_BUNDLE` option to build macOS app bundles.
 

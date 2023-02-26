@@ -15,7 +15,6 @@ target_include_directories(${TARGET_NAME} PUBLIC "${SLICER_PATH}")
 
 find_package(SndFile CONFIG REQUIRED)
 
-
 set(QT_COMPONENTS Core Widgets Gui)
 
 if(USE_QT5)
@@ -30,11 +29,6 @@ foreach(item ${QT_COMPONENTS})
     target_link_libraries(${TARGET_NAME} PRIVATE
             Qt${QT_VERSION_MAJOR}::${item})
 endforeach()
-
-#target_link_libraries(${TARGET_NAME} PRIVATE
-#        Qt${QT_VERSION_MAJOR}::Core
-#        Qt${QT_VERSION_MAJOR}::Widgets
-#        Qt${QT_VERSION_MAJOR}::Gui)
 
 target_link_libraries(${TARGET_NAME} PRIVATE SndFile::sndfile)  # libsndfile
 
