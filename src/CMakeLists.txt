@@ -1,4 +1,6 @@
-project(AudioSlicer)
+project(AudioSlicer VERSION ${BUILD_VERSION} LANGUAGES CXX)
+
+set(TARGET_NAME ${PROJECT_NAME})
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -15,6 +17,7 @@ option(AUDIO_SLICER_GUI "Build GUI version" ON)
 option(BUILD_MACOSX_BUNDLE "Build macOS app bundle" ON)
 
 
+add_subdirectory(app)
 add_subdirectory(slicer)
 
 if(NOT(AUDIO_SLICER_CLI OR AUDIO_SLICER_GUI))

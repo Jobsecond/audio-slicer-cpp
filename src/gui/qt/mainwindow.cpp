@@ -6,10 +6,13 @@
 #include <QValidator>
 #include <QThreadPool>
 #include <QRunnable>
+#include <QSysInfo>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "workthread.h"
+
+#include "app_config.h"
 
 
 
@@ -117,7 +120,10 @@ void MainWindow::slot_clear_audio_list()
 
 void MainWindow::slot_about()
 {
-    QMessageBox::information(this, "About", "Audio Slicer v1.1.0\nCopyright 2020-2023 OpenVPI Team");
+    QString arch = QSysInfo::currentCpuArchitecture();
+    QString aboutMsg = QString("Audio Slicer %1 (%2)\n%3\n\n%4\n\nQt Version %5")
+            .arg(BUILD_VERSION, arch, COPYRIGHT_TEXT, ABOUT_TEXT_OTHER, qVersion());
+    QMessageBox::information(this, "About", aboutMsg);
 }
 
 void MainWindow::slot_start()

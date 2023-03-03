@@ -22,6 +22,13 @@ inline std::vector<double> get_rms(const std::vector<T>& arr, uint64_t frame_len
 
 Slicer::Slicer(int sr, double threshold, uint64_t min_length, uint64_t min_interval, uint64_t hop_size, uint64_t max_sil_kept)
 {
+    this->errcode = SlicerErrorCode::SLICER_OK;
+    if ((!((min_length >= min_interval) && (min_interval >= hop_size))) || (max_sil_kept < hop_size))
+    {
+        // The following condition must be satisfied: min_length >= min_interval >= hop_size
+        // The following condition must be satisfied: max_sil_kept >= hop_size
+        this->errcode = SlicerErrorCode::SLICER_INVALID_ARGUMENT;
+    }
     this->threshold = std::pow(10, threshold / 20.0);
     this->hop_size = divIntRound<uint64_t>(hop_size * (uint64_t)sr, (uint64_t)1000);
     this->win_size = std::min(divIntRound<uint64_t>(min_interval * (uint64_t)sr, (uint64_t)1000), (uint64_t)4 * this->hop_size);
@@ -33,12 +40,11 @@ Slicer::Slicer(int sr, double threshold, uint64_t min_length, uint64_t min_inter
 std::vector<std::tuple<uint64_t, uint64_t>>
 Slicer::slice(const std::vector<float>& waveform, unsigned int channels)
 {
-    if ((!((min_length >= min_interval) && (min_interval >= hop_size))) || (max_sil_kept < hop_size))
+    if (this->errcode == SlicerErrorCode::SLICER_INVALID_ARGUMENT)
     {
-        // The following condition must be satisfied: min_length >= min_interval >= hop_size
-        // The following condition must be satisfied: max_sil_kept >= hop_size
         return {};
     }
+    this->errcode = SlicerErrorCode::SLICER_OK;
 
     uint64_t frames = waveform.size() / channels;
     std::vector<float> samples = multichannel_to_mono<float>(waveform, channels);
@@ -174,6 +180,11 @@ Slicer::slice(const std::vector<float>& waveform, unsigned int channels)
         }
         return chunks;
     }
+}
+
+SlicerErrorCode Slicer::getErrorCode()
+{
+    return this->errcode;
 }
 
 template<class T>
