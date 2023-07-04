@@ -141,6 +141,7 @@ void MainWindow::slot_start()
     }
 
     m_workFinished = 0;
+    m_workError = 0;
     m_workTotal = item_count;
 
     ui->progressBar->setMinimum(0);
@@ -198,6 +199,7 @@ void MainWindow::slot_oneFinished()
 void MainWindow::slot_oneError(const QString& errmsg)
 {
     m_workFinished++;
+    m_workError++;
     ui->progressBar->setValue(m_workFinished);
 #ifdef Q_OS_WIN
     if (m_pTaskbarList3)
@@ -217,8 +219,6 @@ void MainWindow::slot_oneError(const QString& errmsg)
 void MainWindow::slot_threadFinished()
 {
     setProcessing(false);
-    m_workFinished = 0;
-    m_workTotal = 0;
 #ifdef Q_OS_WIN
     if (m_pTaskbarList3)
     {
@@ -226,7 +226,12 @@ void MainWindow::slot_threadFinished()
     }
 #endif
     QMessageBox::information(
-            this, QApplication::applicationName(), "Slicing complete!");
+            this, QApplication::applicationName(),
+            QString("Slicing complete! Total: %3, Success: %1, Failed: %2")
+                .arg(m_workTotal - m_workError).arg( m_workError).arg(m_workTotal));
+    m_workFinished = 0;
+    m_workError = 0;
+    m_workTotal = 0;
 }
 
 void MainWindow::warningProcessNotFinished()

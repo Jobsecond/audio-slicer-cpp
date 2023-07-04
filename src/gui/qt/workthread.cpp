@@ -88,6 +88,7 @@ void WorkThread::run()
             std::filesystem::create_directories(out);
         }
 
+        bool write_error = false;
         int idx = 0;
         for (auto chunk : chunks)
         {
@@ -110,8 +111,18 @@ void WorkThread::run()
             std::string out_file_path_str = out_file_path.string();
 #endif
             SndfileHandle wf = SndfileHandle(out_file_path_str.c_str(), SFM_WRITE, format, channels, sr);
-            wf.write(audio.data() + begin_frame, frame_count);
+            auto bytes_written = wf.write(audio.data() + begin_frame, frame_count);
+            if (bytes_written == 0)
+            {
+                write_error = true;
+            }
             idx++;
+        }
+        if (write_error)
+        {
+            QString errmsg = QString("Zero bytes written");
+            emit oneError(errmsg);
+            return;
         }
     }
     catch (const std::filesystem::filesystem_error& err)

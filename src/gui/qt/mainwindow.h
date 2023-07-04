@@ -48,6 +48,7 @@ private:
     bool m_processing;
     int m_workTotal;
     int m_workFinished;
+    int m_workError;
     QThreadPool *m_threadpool;
 
     void warningProcessNotFinished();
