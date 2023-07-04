@@ -49,7 +49,7 @@ Slicer::slice(const std::vector<float>& waveform, unsigned int channels)
     uint64_t frames = waveform.size() / channels;
     std::vector<float> samples = multichannel_to_mono<float>(waveform, channels);
 
-    if (samples.size() <= this->min_length)
+    if ((samples.size() + this->hop_size - 1) / this->hop_size <= this->min_length)
     {
         std::vector<std::tuple<uint64_t, uint64_t>> v {{ 0, frames }};
         return v;
